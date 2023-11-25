@@ -45,8 +45,12 @@ headline = news_info['articles'][0]['title']
 news_description = news_info['articles'][0]['description']
 
 # Extracting the recent and previous closing prices of the stock
-recent_ending_price = stocks_info['Time Series (Daily)']['2023-11-24']['4. close']
-previous_ending_price = stocks_info['Time Series (Daily)']['2023-11-22']['4. close']
+new_stock_info = stocks_info['Time Series (Daily)']
+stock_list = [value for (key, value) in new_stock_info.items()]
+recent_data = stock_list[0]
+recent_ending_price = recent_data["4. close"]
+previous_data = stock_list[1]
+previous_ending_price = previous_data["4. close"]
 
 # Computing the percentage change in stock price
 change_in_stock_price = (float(recent_ending_price) - float(previous_ending_price)) / float(previous_ending_price) * 100
@@ -72,6 +76,3 @@ else:
 
 # Sending the message via Telegram bot
 telegram_bot_sendtext(message)
-
-
-
