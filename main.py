@@ -8,6 +8,8 @@ STOCK = "CVS"
 # Load sensitive data from environment variables
 stock_market_api_key = os.getenv('ALPHAVANTAGE_API_KEY')  # API key for alpha
 news_api_key = os.getenv('NEWSAPI_API_KEY')  # API key for newsapi
+bot_token = os.getenv('BOT_TOKEN')  # Token for telegram messaging bot
+chat_id = os.getenv('CHAT_ID')  # Token for telegram chat id
 
 # API endpoints for Alpha Vantage and NewsAPI
 alpha_endpoint = 'https://www.alphavantage.co/query'
@@ -42,7 +44,7 @@ news_info = news_data.json()
 headline = news_info['articles'][0]['title']
 news_description = news_info['articles'][0]['description']
 
-# Calculating the recent and previous closing prices of the stock
+# Extracting the recent and previous closing prices of the stock
 recent_ending_price = stocks_info['Time Series (Daily)']['2023-11-24']['4. close']
 previous_ending_price = stocks_info['Time Series (Daily)']['2023-11-22']['4. close']
 
@@ -50,21 +52,26 @@ previous_ending_price = stocks_info['Time Series (Daily)']['2023-11-22']['4. clo
 change_in_stock_price = (float(recent_ending_price) - float(previous_ending_price)) / float(previous_ending_price) * 100
 num_rounded = format(change_in_stock_price, ".1f")
 
-# Displaying the stock change and news information based on the stock's performance
+
+def telegram_bot_sendtext(bot_message):
+    # Construct the URL for the Telegram sendMessage API
+    send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + chat_id + '&parse_mode=Markdown&text=' + bot_message
+
+    # Send the request to Telegram API and get the response
+    response = requests.get(send_text)
+
+    # Return the JSON response
+    return response.json()
+
+
+# Constructing the message based on stock performance
 if change_in_stock_price >= 0:
-    print(f"{STOCK}:🔺{num_rounded}%")
-    print(f"Headline: {headline}.")
-    print(f"Brief: {news_description}")
+    message = f"{STOCK}: 🔺{num_rounded}%\nHeadline: {headline}\nBrief: {news_description}"
 else:
-    print(f"{STOCK}:🔻{num_rounded}%")
-    print(f"Headline: {headline}.")
-    print(f"Brief: {news_description}")
+    message = f"{STOCK}: 🔻{num_rounded}%\nHeadline: {headline}\nBrief: {news_description}"
 
-
-# Future Implementation Steps:
-# 1. Add functionality to check if the stock price change is more than 5%.
-# 2. Implement Twilio API to send the stock change and news as an SMS.
-# 3. Format the SMS message to include the stock symbol, percentage change, headline, and brief description.
+# Sending the message via Telegram bot
+telegram_bot_sendtext(message)
 
 
 
